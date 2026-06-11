@@ -1,0 +1,83 @@
+.task-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s;
+}
+
+/* Overdue: red tint */
+.task-item.overdue {
+  background: var(--overdue);
+  border-color: var(--overdue-border);
+}
+
+/* Completed: dimmed */
+.task-item.completed .task-title {
+  text-decoration: line-through;
+  color: var(--completed-text);
+}
+
+/* ── View mode ── */
+.task-view {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.task-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+}
+
+.task-left input[type="checkbox"] {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.task-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.task-title {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.task-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.task-due {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.task-due.overdue-label {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+/* ── Edit mode ── */
+.task-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Action buttons ── */
+.task-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}

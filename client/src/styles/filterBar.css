@@ -1,0 +1,23 @@
+.filter-bar {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-bar button {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  padding: 6px 12px;
+}
+
+.filter-bar button:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.filter-bar button.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
