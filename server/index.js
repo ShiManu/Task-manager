@@ -11,6 +11,15 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+app.get("/health", async (req, res) => {
+  try {
+    const tasks = await getAllTasks();
+    res.json({ status: "ok", taskCount: tasks.length, supabaseUrl: (process.env.SUPABASE_URL || "").replace(/\/rest\/v1\/?$/, "") });
+  } catch (err) {
+    res.json({ status: "error", message: err.message });
+  }
+});
+
 app.get("/tasks", async (req, res) => {
   try {
     const tasks = await getAllTasks();
