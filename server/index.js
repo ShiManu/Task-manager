@@ -1,67 +1,62 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const { readTasks, writeTasks } = require("./storage");
+const { getAllTasks, insertTask, updateTaskById, deleteTaskById } = require("./storage");
 const { createTask, updateTask } = require("./taskHelpers");
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-// GET /tasks - return all tasks sorted newest first
-app.get("/tasks", (req, res) => {
-  const tasks = readTasks();
-  const sorted = [...tasks].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
-  res.json(sorted);
+app.get("/tasks", async (req, res) => {
+  try {
+    const tasks = await getAllTasks();
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-// POST /tasks - create a new task
-app.post("/tasks", (req, res) => {
-  const { title, description, dueDate } = req.body;
+app.post("/tasks", async (req, res) => {
+  try {
+    const { title, description, dueDate } = req.body;
 
-  if (!title || title.trim() === "") {
-    return res.status(400).json({ error: "Title is required" });
+    if (!title || title.trim() === "") {
+      return res.status(400).json({ error: "Title is required" });
+    }
+
+    const task = createTask({ title, description, dueDate });
+    const created = await insertTask(task);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-
-  const tasks = readTasks();
-  const newTask = createTask({ title, description, dueDate });
-  tasks.push(newTask);
-  writeTasks(tasks);
-
-  res.status(201).json(newTask);
 });
 
-// PUT /tasks/:id - update a task's fields
-app.put("/tasks/:id", (req, res) => {
-  const tasks = readTasks();
-  const index = tasks.findIndex((t) => t.id === req.params.id);
+app.put("/tasks/:id", async (req, res) => {
+  try {
+    const updated = await updateTaskById(req.params.id, req.body);
 
-  if (index === -1) {
-    return res.status(404).json({ error: "Task not found" });
+    if (!updated) {
+      return res.status(404).json({ error: "Task not found" });
+    }
+
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-
-  tasks[index] = updateTask(tasks[index], req.body);
-  writeTasks(tasks);
-
-  res.json(tasks[index]);
 });
 
-// DELETE /tasks/:id - delete a task
-app.delete("/tasks/:id", (req, res) => {
-  const tasks = readTasks();
-  const index = tasks.findIndex((t) => t.id === req.params.id);
-
-  if (index === -1) {
-    return res.status(404).json({ error: "Task not found" });
+app.delete("/tasks/:id", async (req, res) => {
+  try {
+    await deleteTaskById(req.params.id);
+    res.json({ message: "Task deleted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-
-  tasks.splice(index, 1);
-  writeTasks(tasks);
-
-  res.json({ message: "Task deleted" });
 });
 
 app.listen(PORT, () => {

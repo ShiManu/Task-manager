@@ -1,18 +1,53 @@
-const fs = require("fs");
-const path = require("path");
+const { createClient } = require("@supabase/supabase-js");
 
-const FILE_PATH = path.join(__dirname, "tasks.json");
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-// Read tasks from JSON file; return empty array if file doesn't exist
-function readTasks() {
-  if (!fs.existsSync(FILE_PATH)) return [];
-  const raw = fs.readFileSync(FILE_PATH, "utf-8");
-  return JSON.parse(raw);
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Missing SUPABASE_URL or SUPABASE_ANON_KEY environment variables");
+  process.exit(1);
 }
 
-// Write tasks array to JSON file
-function writeTasks(tasks) {
-  fs.writeFileSync(FILE_PATH, JSON.stringify(tasks, null, 2));
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function getAllTasks() {
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .order("createdAt", { ascending: false });
+
+  if (error) throw error;
+  return data;
 }
 
-module.exports = { readTasks, writeTasks };
+async function insertTask(task) {
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert([task])
+    .select();
+
+  if (error) throw error;
+  return data[0];
+}
+
+async function updateTaskById(id, changes) {
+  const { data, error } = await supabase
+    .from("tasks")
+    .update(changes)
+    .eq("id", id)
+    .select();
+
+  if (error) throw error;
+  return data[0];
+}
+
+async function deleteTaskById(id) {
+  const { error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+}
+
+module.exports = { getAllTasks, insertTask, updateTaskById, deleteTaskById };

@@ -16,29 +16,46 @@ export default function App() {
   useEffect(() => {
     fetchTasks()
       .then(setTasks)
+      .catch(() => setTasks([]))
       .finally(() => setLoading(false));
   }, []);
 
   async function handleCreate(data) {
-    const newTask = await createTask(data);
-    setTasks((prev) => [newTask, ...prev]);
+    try {
+      const newTask = await createTask(data);
+      setTasks((prev) => [newTask, ...prev]);
+    } catch (err) {
+      alert("Failed to create task. Is the server running?");
+    }
   }
 
   async function handleToggle(task) {
-    const updated = await updateTask(task.id, { completed: !task.completed });
-    setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)));
+    try {
+      const updated = await updateTask(task.id, { completed: !task.completed });
+      setTasks((prev) => prev.map((t) => (t.id === task.id ? updated : t)));
+    } catch (err) {
+      alert("Failed to update task.");
+    }
   }
 
   async function handleEdit(id, changes) {
-    const updated = await updateTask(id, changes);
-    setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    try {
+      const updated = await updateTask(id, changes);
+      setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    } catch (err) {
+      alert("Failed to update task.");
+    }
   }
 
   async function handleDelete(id) {
     const confirmed = window.confirm("Delete this task?");
     if (!confirmed) return;
-    await deleteTask(id);
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+    try {
+      await deleteTask(id);
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+    } catch (err) {
+      alert("Failed to delete task.");
+    }
   }
 
   // Apply filter and search

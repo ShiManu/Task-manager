@@ -1,8 +1,16 @@
 const BASE = "/tasks";
 
+async function handleResponse(res) {
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Request failed with status ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function fetchTasks() {
   const res = await fetch(BASE);
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function createTask(data) {
@@ -11,7 +19,7 @@ export async function createTask(data) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function updateTask(id, changes) {
@@ -20,9 +28,13 @@ export async function updateTask(id, changes) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(changes),
   });
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function deleteTask(id) {
-  await fetch(`${BASE}/${id}`, { method: "DELETE" });
+  const res = await fetch(`${BASE}/${id}`, { method: "DELETE" });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Request failed with status ${res.status}`);
+  }
 }
